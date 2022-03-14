@@ -1,0 +1,58 @@
+///<Summary>Заметка для блокнота, который работает на блокчейне</Summary>
+class Note
+{
+    public static string Splitter = "_splitter_";
+    private string text;
+    private byte[] hash;
+ 
+    public Note(string text)
+    {
+        this.text = text;
+        this.hash = ComputeHash(text);
+    }
+ 
+    private byte[] ComputeHash(string text)
+    {
+        SHA256 sha = SHA256.Create(); //Создаём объект, который будет вычислять хеш
+        byte[] textBytes = Encoding.Default.GetBytes(text); //Преобразуем текст заметки в байты
+ 
+        return sha.ComputeHash(textBytes); //Возвращаем хеш
+    }
+ 
+    ///<Summary>Полный текст заметки</Summary>
+    public string Text { get { return this.text; } }
+ 
+    ///<Summary>Текст заметки без хеша прошлого блока</Summary>
+    public string ClearText
+    {
+        get
+        {
+            return this.text.Remove(0, this.text.IndexOf(Note.Splitter) + Note.Splitter.Length);
+        }
+    }
+ 
+    ///<Summary>Хеш прошлого блока</Summary>
+    public string PreviousHash
+    {
+        get
+        {
+            return this.text.Remove(this.text.IndexOf(Note.Splitter));
+        }
+    }
+ 
+    ///<Summary>Хеш текущего блока в виде строки</Summary>
+    public string HashString
+    {
+        get
+        {
+            //При каждом получении текущего хеша нужно считать его заново
+            //Так мы будем уверены, что он актуален
+            var hash = ComputeHash(this.text); 
+            return Encoding.Default.GetString(hash);
+        }
+    }
+ 
+    ///<Summary>Хеш в виде байтов</Summary>
+    public byte[] Hash { get { return this.hash; } }
+ 
+}
